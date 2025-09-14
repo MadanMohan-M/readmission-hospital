@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Readmission Risk - HealthGuard AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'medical': {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .medical-gradient {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+        }
+        .form-card {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .input-field {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+        }
+        .input-field:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <nav class="bg-medical-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a class="text-2xl font-bold flex items-center" href="#">
+                <i class="fas fa-heartbeat mr-2 text-medical-200"></i>
+                HealthGuard AI
+            </a>
+            <div class="flex items-center space-x-4">
+                <span class="text-medical-100">Welcome, Doctor</span>
+                <a class="text-medical-200 hover:text-white transition-colors flex items-center" href="#">
+                    <i class="fas fa-home mr-1"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto">
+            <div class="form-card p-8">
+                <header class="text-center mb-10">
+                    <h1 class="text-4xl font-extrabold text-medical-800 mb-2">
+                        <i class="fas fa-stethoscope mr-3"></i>
+                        Patient Readmission Risk Assessment
+                    </h1>
+                    <p class="text-gray-600 max-w-2xl mx-auto">
+                        Input the patient's data below to predict their risk of readmission. The AI model will analyze these factors to provide a comprehensive risk score.
+                    </p>
+                </header>
+                
+                <form id="prediction-form" method="POST" class="space-y-6">
+                    <div class="bg-medical-50 p-6 rounded-xl border border-medical-100">
+                        <h3 class="text-xl font-semibold text-medical-800 mb-4">Patient Demographics</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Age Group</label>
+                                <select class="input-field w-full" name="age" required>
+                                    <option value="">Select Age Group</option>
+                                    <option value="[0-10)">0-10 years</option>
+                                    <option value="[10-20)">10-20 years</option>
+                                    <option value="[20-30)">20-30 years</option>
+                                    <option value="[30-40)">30-40 years</option>
+                                    <option value="[40-50)">40-50 years</option>
+                                    <option value="[50-60)">50-60 years</option>
+                                    <option value="[60-70)">60-70 years</option>
+                                    <option value="[70-80)">70-80 years</option>
+                                    <option value="[80-90)">80-90 years</option>
+                                    <option value="[90-100)">90-100 years</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Time in Hospital (days)</label>
+                                <input type="number" class="input-field w-full" name="time_in_hospital" min="1" max="14" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-medical-50 p-6 rounded-xl border border-medical-100">
+                        <h3 class="text-xl font-semibold text-medical-800 mb-4">Medical Tests & Medication</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">A1C Test Result</label>
+                                <select class="input-field w-full" name="A1Ctest" required>
+                                    <option value="">Select Result</option>
+                                    <option value="no">Not Tested</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Glucose Test Result</label>
+                                <select class="input-field w-full" name="glucose_test" required>
+                                    <option value="">Select Result</option>
+                                    <option value="no">Not Tested</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Diabetes Medication</label>
+                                <select class="input-field w-full" name="diabetes_med" required>
+                                    <option value="">Select</option>
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-medical-50 p-6 rounded-xl border border-medical-100">
+                        <h3 class="text-xl font-semibold text-medical-800 mb-4">Visit Statistics</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Emergency Visits</label>
+                                <input type="number" class="input-field w-full" name="n_emergency" min="0" max="20" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Outpatient Visits</label>
+                                <input type="number" class="input-field w-full" name="n_outpatient" min="0" max="20" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Inpatient Visits</label>
+                                <input type="number" class="input-field w-full" name="n_inpatient" min="0" max="20" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Medications</label>
+                                <input type="number" class="input-field w-full" name="n_medications" min="1" max="50" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-medical-50 p-6 rounded-xl border border-medical-100">
+                        <h3 class="text-xl font-semibold text-medical-800 mb-4">Additional Medical Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Number of Procedures</label>
+                                <input type="number" class="input-field w-full" name="n_procedures" min="0" max="10" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Lab Procedures</label>
+                                <input type="number" class="input-field w-full" name="n_lab_procedures" min="0" max="100" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Medication Change</label>
+                                <select class="input-field w-full" name="change" required>
+                                    <option value="">Select</option>
+                                    <option value="no">No Change</option>
+                                    <option value="yes">Changed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-medical-50 p-6 rounded-xl border border-medical-100">
+                        <h3 class="text-xl font-semibold text-medical-800 mb-4">Diagnosis & Specialty</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Primary Diagnosis</label>
+                                    <input type="text" class="input-field w-full" name="diag_1" placeholder="e.g., 250.00" required>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Secondary Diagnosis</label>
+                                    <input type="text" class="input-field w-full" name="diag_2" placeholder="e.g., 401.9">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Additional Diagnosis</label>
+                                    <input type="text" class="input-field w-full" name="diag_3" placeholder="e.g., 272.4">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Medical Specialty</label>
+                                <select class="input-field w-full" name="medical_specialty" required>
+                                    <option value="">Select Specialty</option>
+                                    <option value="Cardiology">Cardiology</option>
+                                    <option value="InternalMedicine">Internal Medicine</option>
+                                    <option value="Family/GeneralPractice">Family/General Practice</option>
+                                    <option value="Surgery">Surgery</option>
+                                    <option value="Emergency">Emergency Medicine</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center pt-4">
+                        <button type="submit" class="btn-primary flex items-center justify-center mx-auto" id="submitBtn">
+                            <i class="fas fa-calculator mr-2" id="submitIcon"></i>
+                            <span id="submitText">Predict Readmission Risk</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 text-gray-300 py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-white">HealthGuard AI</h4>
+                    <p class="text-sm">
+                        Driving clinical excellence with intelligent, data-driven solutions. Our mission is to transform patient care through predictive analytics.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-white">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Services</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-white">Services</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Patient Analytics</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">AI Diagnostics</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Clinical Decision Support</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-white">Contact Info</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-3"></i>
+                            info@healthguardai.com
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-3"></i>
+                            +1 (555) 123-4567
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-3"></i>
+                            123 Innovation Drive, Tech City
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 HealthGuard AI. All rights reserved. Transforming healthcare through AI innovation.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const predictionForm = document.getElementById('prediction-form');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitIcon = document.getElementById('submitIcon');
+            
+            if (predictionForm) {
+                predictionForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Store original state
+                    const originalText = submitText.textContent;
+                    const originalIconClass = submitIcon.className;
+
+                    // Show loading state
+                    submitText.textContent = 'Processing...';
+                    submitIcon.className = 'fas fa-spinner fa-spin mr-2';
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                    
+                    // Simulate form submission via AJAX
+                    const formData = new FormData(predictionForm);
+                    
+                    fetch('/process_prediction', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Redirect to results page
+                            window.location.href = data.redirect_url;
+                        } else {
+                            alert('Error: ' + data.error);
+                            // Revert button state on error
+                            submitText.textContent = originalText;
+                            submitIcon.className = originalIconClass;
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                        // Revert button state on network error
+                        submitText.textContent = originalText;
+                        submitIcon.className = originalIconClass;
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Patient History - HealthGuard AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-header {
+        background: white; border-radius: 16px; padding: 30px; margin-bottom: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .history-title { font-size: 2em; font-weight: 700; color: #1e293b; }
+    .history-subtitle { color: #64748b; margin-top: 4px; }
+    .search-controls { display: flex; gap: 12px; align-items: center; }
+    .search-bar {
+        padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px;
+        width: 280px; font-size: 1em; transition: all 0.3s ease;
+    }
+    .search-bar:focus {
+        outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    
+    .stats-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: white; border-radius: 12px; padding: 20px; text-align: center;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-number {
+        font-size: 2.2em; font-weight: 700; margin-bottom: 8px;
+        background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-card:nth-child(2) .stat-number {
+        background: linear-gradient(45deg, #ef4444, #dc2626);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-card:nth-child(3) .stat-number {
+        background: linear-gradient(45deg, #10b981, #059669);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { color: #64748b; font-weight: 500; }
+    
+    .table-container {
+        background: white; border-radius: 16px; overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+    }
+    .table-header {
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        color: white; padding: 24px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .table-title { font-size: 1.3em; font-weight: 600; }
+    
+    .patient-table { width: 100%; border-collapse: collapse; }
+    .patient-table th {
+        background: #f8fafc; color: #374151; padding: 16px 20px; font-weight: 600;
+        text-align: left; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .patient-table td { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .patient-table tr:hover { background: #f8fafc; transform: translateX(2px); transition: all 0.2s ease; }
+    
+    .patient-id {
+        font-family: 'Monaco', 'Menlo', monospace; font-weight: 600; color: #1e40af; font-size: 0.9em;
+    }
+    .date-badge {
+        background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 12px;
+        font-size: 0.85em; font-weight: 600;
+    }
+    
+    .risk-badge {
+        display: inline-block; padding: 6px 14px; border-radius: 18px; font-weight: 600;
+        font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; color: white;
+    }
+    .risk-high { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .risk-medium { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .risk-low { background: linear-gradient(135deg, #10b981, #059669); }
+    
+    .action-btn {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none;
+        padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500;
+        transition: all 0.3s ease; font-size: 0.9em;
+    }
+    .action-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(59,130,246,0.3); }
+    
+    .empty-state {
+        text-align: center; padding: 60px 20px; color: #64748b;
+    }
+    .empty-icon { font-size: 4em; margin-bottom: 20px; color: #cbd5e1; }
+    .empty-title { font-size: 1.4em; font-weight: 600; margin-bottom: 8px; }
+    
+    .floating-btn {
+        position: fixed; bottom: 24px; right: 24px; width: 64px; height: 64px;
+        border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669);
+        color: white; border: none; font-size: 1.5em; cursor: pointer;
+        box-shadow: 0 8px 25px rgba(16,185,129,0.4); transition: all 0.3s ease; z-index: 1000;
+    }
+    .floating-btn:hover { transform: scale(1.1) rotate(90deg); }
+    
+    @media (max-width: 768px) {
+        .history-header { flex-direction: column; gap: 16px; text-align: center; }
+        .search-controls { justify-content: center; }
+        .search-bar { width: 100%; }
+        .patient-table { font-size: 0.9em; }
+        .patient-table th, .patient-table td { padding: 12px 8px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-header">
+    <div>
+        <div class="history-title">📋 Patient Assessment History</div>
+        <div class="history-subtitle">Comprehensive readmission risk evaluation records</div>
+    </div>
+    <div class="search-controls">
+        <input type="text" class="search-bar" placeholder="🔍 Search by Patient ID, Risk Level..." id="searchInput">
+        <button class="btn btn-primary" onclick="exportData()">
+            <i class="fas fa-download"></i> Export
+        </button>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ patients | list | length }}</div>
+        <div class="stat-label">Total Assessments</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">
+            {{ patients | selectattr('risk_level', 'equalto', 'High') | list | length }}
+        </div>
+        <div class="stat-label">High Risk Cases</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">
+            {{ patients | selectattr('risk_level', 'equalto', 'Low') | list | length }}
+        </div>
+        <div class="stat-label">Low Risk Cases</div>
+    </div>
+</div>
+
+{% if patients | list | length > 0 %}
+<div class="table-container">
+    <div class="table-header">
+        <div class="table-title">📊 Patient Assessment Records</div>
+        <div style="color: rgba(255,255,255,0.8); font-size: 0.9em;">
+            Last updated: {{ moment().format('MMM DD, YYYY HH:mm') }}
+        </div>
+    </div>
+    
+    <table class="patient-table" id="patientTable">
+        <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Assessment Date</th>
+                <th>Risk Score</th>
+                <th>Risk Level</th>
+                <th>Assessed By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr class="patient-row">
+                <td class="patient-id">{{ patient.id }}</td>
+                <td>
+                    <span class="date-badge">{{ patient.timestamp[:10] }}</span>
+                    <div style="font-size: 0.8em; color: #64748b; margin-top: 2px;">
+                        {{ patient.timestamp[11:16] }}
+                    </div>
+                </td>
+                <td>
+                    <div style="font-size: 1.2em; font-weight: 600;">{{ patient.probability }}%</div>
+                    <div style="font-size: 0.8em; color: #64748b;">Probability</div>
+                </td>
+                <td>
+                    <span class="risk-badge risk-{{ patient.risk_color }}">
+                        {{ patient.risk_level }} Risk
+                    </span>
+                </td>
+                <td>
+                    <div style="font-weight: 600;">{{ patient.assessed_by }}</div>
+                    <div style="font-size: 0.8em; color: #64748b;">Clinician</div>
+                </td>
+                <td>
+                    <a href="{{ url_for('patient_detail', patient_id=patient.id) }}" class="action-btn">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">No Patient Records Found</div>
+        <div>Start by conducting your first patient risk assessment</div>
+        <div style="margin-top: 20px;">
+            <a href="{{ url_for('predict_page') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Assessment
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<button class="floating-btn" onclick="location.href='{{ url_for('predict_page') }}'" title="New Assessment">
+    <i class="fas fa-plus"></i>
+</button>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live search functionality
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('.patient-row');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+
+function exportData() {
+    // Simulate data export
+    const data = [];
+    document.querySelectorAll('.patient-row').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        data.push({
+            id: cells.textContent.trim(),
+            date: cells[1].textContent.trim().split('\n').trim(),
+            risk_score: cells[2].textContent.trim().split('%'),
+            risk_level: cells[3].textContent.trim(),
+            assessed_by: cells[4].textContent.trim().split('\n').trim()
+        });
+    });
+    
+    const csv = [
+        'Patient ID,Date,Risk Score,Risk Level,Assessed By',
+        ...data.map(row => Object.values(row).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'patient_assessments.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Auto-refresh stats every 30 seconds
+setInterval(() => {
+    fetch('/api/live_stats')
+        .then(response => response.json())
+        .then(data => {
+            // Update live stats if needed
+            console.log('Stats updated:', data);
+        })
+        .catch(error => console.log('Stats update failed:', error));
+}, 30000);
+</script>
+{% endblock %}

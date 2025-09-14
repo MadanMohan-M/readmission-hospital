@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Login - HealthGuard AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background: url("https://images.unsplash.com/photo-1586773860418-d37222d8fce3?ixlib=rb-4.0.3&q=80&w=1920")
+                    no-repeat center center/cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 420px;
+        padding: 20px;
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        padding: 35px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        animation: fadeIn 0.7s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .login-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #064e3b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .form-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #059669;
+        font-size: 1.1em;
+        pointer-events: none;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 14px 14px 42px; /* extra left padding so text starts after icon */
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        font-size: 1em;
+        transition: 0.3s ease;
+        background: #f9fafb;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #059669;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: 600;
+        background: #065f46;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+        background: #047857;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(4, 120, 87, 0.3);
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.9em;
+        color: #374151;
+    }
+
+    .login-footer a {
+        color: #059669;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .login-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-title">
+                <i class="fas fa-hospital-user"></i> Hospital Login
+            </div>
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <i class="fas fa-user form-icon"></i>
+                <input type="text" id="username" name="username" class="form-input" 
+                       placeholder="Enter your login ID" required>
+            </div>
+
+            <div class="form-group">
+                <i class="fas fa-lock form-icon"></i>
+                <input type="password" id="password" name="password" class="form-input" 
+                       placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <div style="margin-top: 12px;">
+                <a href="#">Forgot Password?</a>
+            </div>
+            <div style="margin-top: 8px;">
+                Don’t have an account? <a href="#">Sign Up</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

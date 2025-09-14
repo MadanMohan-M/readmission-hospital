@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - HealthGuard AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: white; border-radius: 16px; padding: 30px; margin-bottom: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+    }
+    .welcome-text { font-size: 2.2em; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+    .welcome-subtitle { color: #64748b; font-size: 1.1em; }
+    
+    .kpi-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px; margin-bottom: 30px;
+    }
+    .kpi-card {
+        background: white; border-radius: 16px; padding: 28px; text-align: center;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        transition: all 0.3s ease; position: relative; overflow: hidden;
+    }
+    .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 15px 45px rgba(0,0,0,0.1); }
+    .kpi-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    }
+    .kpi-card:nth-child(1)::before { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+    .kpi-card:nth-child(2)::before { background: linear-gradient(90deg, #ef4444, #dc2626); }
+    .kpi-card:nth-child(3)::before { background: linear-gradient(90deg, #10b981, #059669); }
+    .kpi-card:nth-child(4)::before { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
+    
+    .kpi-number {
+        font-size: 3.2em; font-weight: 700; margin-bottom: 12px;
+        background: linear-gradient(45deg, #1e293b, #475569);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .kpi-card:nth-child(1) .kpi-number { 
+        background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .kpi-card:nth-child(2) .kpi-number {
+        background: linear-gradient(45deg, #ef4444, #dc2626);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .kpi-card:nth-child(3) .kpi-number {
+        background: linear-gradient(45deg, #10b981, #059669);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .kpi-card:nth-child(4) .kpi-number {
+        background: linear-gradient(45deg, #8b5cf6, #7c3aed);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    
+    .kpi-label { color: #64748b; font-size: 1.1em; font-weight: 600; margin-bottom: 8px; }
+    .kpi-change {
+        font-size: 0.9em; padding: 4px 12px; border-radius: 12px; display: inline-block;
+        font-weight: 600;
+    }
+    .kpi-positive { background: #dcfce7; color: #166534; }
+    .kpi-info { background: #dbeafe; color: #1e40af; }
+    
+    .quick-actions {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px; margin-top: 30px;
+    }
+    .action-card {
+        background: white; border-radius: 16px; padding: 24px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        transition: all 0.3s ease; text-align: center;
+    }
+    .action-card:hover { transform: translateY(-4px); }
+    .action-icon {
+        width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2em; color: white;
+    }
+    .action-card:nth-child(1) .action-icon { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .action-card:nth-child(2) .action-icon { background: linear-gradient(135deg, #10b981, #059669); }
+    .action-card:nth-child(3) .action-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="welcome-text">
+        Welcome back, {{ doctor.name or 'Doctor' }}! 👋
+    </div>
+    <div class="welcome-subtitle">
+        {{ doctor.role or 'Medical Professional' }} • {{ doctor.department or 'Healthcare' }} Department
+        <br>Live system status: <strong style="color: #10b981;">All systems operational</strong>
+    </div>
+</div>
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-number" id="totalAssessments">{{ stats.total_assessments }}</div>
+        <div class="kpi-label">Total Assessments</div>
+        <div class="kpi-change kpi-positive">+12% this month</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-number" id="highRiskCases">{{ stats.high_risk_cases }}</div>
+        <div class="kpi-label">High Risk Cases</div>
+        <div class="kpi-change kpi-info">Live monitoring</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-number">${{ "{:,.0f}".format(stats.cost_savings) }}</div>
+        <div class="kpi-label">Annual Savings</div>
+        <div class="kpi-change kpi-positive">Projected ROI</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-number">{{ stats.accuracy }}%</div>
+        <div class="kpi-label">Model Accuracy</div>
+        <div class="kpi-change kpi-positive">AUC-ROC Score</div>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <div class="action-card">
+        <div class="action-icon">
+            <i class="fas fa-user-md"></i>
+        </div>
+        <h3 style="margin-bottom: 10px;">New Assessment</h3>
+        <p style="color: #64748b; margin-bottom: 20px;">
+            Evaluate patient readmission risk using AI-powered analysis
+        </p>
+        <a href="{{ url_for('predict_page') }}" class="btn btn-primary">
+            <i class="fas fa-stethoscope"></i> Start Assessment
+        </a>
+    </div>
+    
+    <div class="action-card">
+        <div class="action-icon">
+            <i class="fas fa-history"></i>
+        </div>
+        <h3 style="margin-bottom: 10px;">Patient Records</h3>
+        <p style="color: #64748b; margin-bottom: 20px;">
+            Review historical assessments and patient outcomes
+        </p>
+        <a href="{{ url_for('history') }}" class="btn btn-primary">
+            <i class="fas fa-folder-open"></i> View History
+        </a>
+    </div>
+    
+    <div class="action-card">
+        <div class="action-icon">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <h3 style="margin-bottom: 10px;">Analytics Dashboard</h3>
+        <p style="color: #64748b; margin-bottom: 20px;">
+            Analyze trends and model performance metrics
+        </p>
+        <a href="{{ url_for('analytics') }}" class="btn btn-primary">
+            <i class="fas fa-analytics"></i> View Analytics
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live stats update
+function updateLiveStats() {
+    fetch('/api/live_stats')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('totalAssessments').textContent = data.total_assessments;
+            document.getElementById('highRiskCases').textContent = data.high_risk_cases;
+        })
+        .catch(error => console.log('Stats update failed:', error));
+}
+
+// Update every 30 seconds
+setInterval(updateLiveStats, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HealthGuard AI - Hospital Readmission Intelligence{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif; 
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #1e293b; min-height: 100vh;
+        }
+        
+        /* Medical Navigation */
+        .medical-navbar {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 25px rgba(37,99,235,0.2);
+            padding: 16px 0; position: sticky; top: 0; z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1400px; margin: 0 auto; display: flex; 
+            justify-content: space-between; align-items: center; padding: 0 24px;
+        }
+        .nav-logo { color: #ffffff; font-weight: 700; font-size: 1.4em; }
+        .nav-links { display: flex; gap: 8px; list-style: none; }
+        .nav-link {
+            color: rgba(255,255,255,0.9); padding: 12px 20px; border-radius: 10px;
+            transition: all 0.3s ease; font-weight: 500; text-decoration: none;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.15); color: #ffffff; transform: translateY(-2px);
+        }
+        .nav-user { color: white; display: flex; align-items: center; gap: 12px; }
+        
+        /* Flash Messages */
+        .flash-messages { max-width: 1200px; margin: 20px auto; padding: 0 24px; }
+        .alert {
+            padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: flex; 
+            align-items: center; gap: 10px;
+        }
+        .alert-success { background: #dcfce7; border: 1px solid #22c55e; color: #166534; }
+        .alert-error { background: #fef2f2; border: 1px solid #ef4444; color: #b91c1c; }
+        .alert-info { background: #dbeafe; border: 1px solid #3b82f6; color: #1e40af; }
+        
+        /* Main Content */
+        .main-content { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        
+        /* Cards */
+        .card {
+            background: white; border-radius: 16px; padding: 24px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; text-decoration: none; border: none; display: inline-block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;
+            box-shadow: 0 6px 20px rgba(59,130,246,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59,130,246,0.4); }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .main-content { padding: 16px; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if session.doctor_logged_in %}
+    <nav class="medical-navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-hospital"></i> HealthGuard AI
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('dashboard') }}" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="{{ url_for('predict_page') }}" class="nav-link">
+                    <i class="fas fa-user-md"></i> Assessment
+                </a>
+                <a href="{{ url_for('history') }}" class="nav-link">
+                    <i class="fas fa-history"></i> History
+                </a>
+                <a href="{{ url_for('analytics') }}" class="nav-link">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+            </div>
+            <div class="nav-user">
+                <span>{{ session.doctor_info.name or 'Doctor' }}</span>
+                <a href="{{ url_for('logout') }}" class="btn" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 16px;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {% if category == 'success' %}<i class="fas fa-check-circle"></i>
+                        {% elif category == 'error' %}<i class="fas fa-exclamation-triangle"></i>
+                        {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Auto-hide flash messages
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-10px)';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
